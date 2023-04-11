@@ -30,7 +30,8 @@ def handle_dialog(res, req):
         res['response']['text'] = 'Привет! Назови своё имя!'
         sessionStorage[user_id] = {
             'cat_selected': False,
-            'first_name': None
+            'first_name': None,
+            'genre_selected': False
         }
         return
 
@@ -59,13 +60,9 @@ def handle_dialog(res, req):
         if not sessionStorage[user_id]['cat_selected']:
             if 'альбом' in req['request']['nlu']['tokens']:
                 sessionStorage[user_id]['cat_selected'] = True
-                res['response']['text'] = '''Какой жанр интересует? 
-                Чтобы узнать список допустимых жанров напиши "Справка"'''
                 albums(res, req)
             elif 'исполнителя' in req['request']['nlu']['tokens']:
                 sessionStorage[user_id]['cat_selected'] = True
-                res['response']['text'] = '''Какой жанр интересует? 
-                                Чтобы узнать список допустимых жанров напиши "Справка"'''
                 musician(res, req)
             else:
                 res['response']['text'] = '''Не поняла ответа! Возможно ты написал неверно, попробуй 
@@ -80,20 +77,26 @@ def handle_dialog(res, req):
                         'hide': True
                     }
                 ]
+        else:
+            albums(res, req)
 
 
 def albums(res, req):
-    res['response']['buttons'] = [
-        {
-            'title': 'Допустимые жанры',
-            'hide': True
-        }
-    ]
     user_id = req['session']['user_id']
-    if 'допустимые жанры' in req['request']['nlu']['tokens']:
-        res['response']['text'] = 'ЖАНРЫ'
+    if not sessionStorage[user_id]['genre_selected']:
+        res['response']['buttons'] = [
+            {
+                'title': 'Допустимые жанры',
+                'hide': True
+            }
+        ]
+        user_id = req['session']['user_id']
+        if 'допустимые' in req['request']['nlu']['tokens'] and 'жанры' in req['request']['nlu']['tokens']:
+            res['response']['text'] = 'ЖАНРЫ'
+        else:
+            res['response']['text'] = f"Пора выбрать жанр!"
     else:
-        res['response']['text'] = f"Пора выбрать жанр!"
+        pass
 
 
 def musician(res, req):
